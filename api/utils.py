@@ -79,7 +79,7 @@ This code will expire in {expiry_minutes} minutes.
 
 If you didn't request this code, please ignore this email.
 
-Best regards,
+Best regar
 The {site_name} Team
 """
 
