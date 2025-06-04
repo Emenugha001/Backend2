@@ -123,13 +123,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class EncryptedFile(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,related_name='files')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='files', blank=True, null=True)
     file = models.FileField(upload_to='encrypted_files/')
     original_filename = models.CharField(max_length=255)
     encrypted_filename = models.CharField(max_length=255, unique=True, blank=True)
     file_size = models.PositiveIntegerField(default=0)
     content_type = models.CharField(max_length=100, blank=True)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
