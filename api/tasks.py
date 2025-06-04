@@ -4,23 +4,6 @@
 # from .models import User, OneTimePassword
 # import random
 
-# @shared_task
-# def send_verification_code_to_user(email):
-#     """Generate a verification code and send it to the user's email."""
-#     verification_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
-
-#     user = User.objects.get(email=email)
-
-#     email_body = f"Hi {user.name},\n\nThank you for signing up. Please use the following verification code to verify your email:\n\n{verification_code}\n\nBest regards,\nTeam"
-
-#     subject = "Email Verification Code"
-#     from_email = settings.EMAIL_HOST_USER
-
-#     OneTimePassword.objects.create(user=user, code=verification_code)
-
-#     # Send the email asynchronously with Celery
-#     email = EmailMessage(subject=subject, body=email_body, from_email=from_email, to=[email])
-#     email.send(fail_silently=True)
 
 
 from celery import shared_task

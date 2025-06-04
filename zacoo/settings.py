@@ -132,6 +132,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'api.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+    ]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -153,19 +158,25 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
+# Media files (User uploaded files)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWS_CREDENTIALS = True
 
 
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'mail.mycastellum.com'
+EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'franciscaoluchi433@gmail.com'
-EMAIL_HOST_PASSWORD = 'vfrwtvrorwgyobge'
-DEFAULT_FROM_EMAIL = 'franciscaoluchi433@gmail.com'
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'hr@mycastellum.com'
+EMAIL_HOST_PASSWORD = 'ao(o[Acq{Gk1'
+DEFAULT_FROM_EMAIL = 'hr@mycastellum.com'
 
 
 
@@ -175,6 +186,12 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Use Redis as result backend
 CELERY_TIMEZONE = 'UTC'
+
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',  # Add your frontend URL
+]
+
 
 # LOGGING = {
 #     'version': 1,

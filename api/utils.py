@@ -1,54 +1,18 @@
 
-
-# import random
-# from django.core.mail import EmailMessage
-# from .models import User, OneTimePassword
-# from django.conf import settings
-
-# def generate_verification_code():
-#     """Generate a random 6-digit verification code."""
-#     verification_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
-#     return verification_code
-
-# def send_verification_code_to_user(email):
-#     """Generate a verification code and send it to the user's email."""
-#     # Generate the verification code
-#     verification_code = generate_verification_code()
-
-#     # Retrieve user by email
-#     user = User.objects.get(email=email)
-
-#     # Site name (can be dynamically set based on your environment)
-#     #current_site = "myAuth.com"
-
-#     # Prepare the email body
-#     email_body = f"Hi {user.name},\n\nThank you for signing up on. Please use the following verification code to verify your email:\n\n{verification_code}\n\nBest regards,\n Team"
-
-#     # Send email using the system's configured email host
-#     subject = "Email Verification Code"
-#     from_email = settings.EMAIL_HOST_USER  # Make sure this is set in your settings
-
-#     # Save the generated verification code in the OneTimePassword model (or a related model)
-#     OneTimePassword.objects.create(user=user, code=verification_code)
-
-#     # Send the email with the verification code
-#     email = EmailMessage(subject=subject, body=email_body, from_email=from_email, to=[email])
-#     email.send(fail_silently=True)
-
-
 import random
 import string
 import logging
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.db import transaction
+from django.utils import timezone
 from .models import User, OneTimePassword
 
 logger = logging.getLogger(__name__)
 
-def generate_verification_code(length=6):
+# def generate_verification_code(length=6):
     
-    return ''.join([str(random.randint(0, 9)) for _ in range(length)])
+#     return ''.join([str(random.randint(0, 9)) for _ in range(length)])
 
 def get_user_by_email(email):
     """
@@ -67,18 +31,14 @@ def get_user_by_email(email):
         logger.error(error_msg)
         return None, error_msg
 
-def create_verification_code_for_user(user, code_length=6, expiry_minutes=10):
-    """
-    Create a new verification code for a user, removing any existing ones.
-    
-    Args:
-        user (User): User object to create code for.
-        code_length (int): Length of verification code to generate.
-        expiry_minutes (int): Minutes until the code expires.
-        
-    Returns:
-        str: The generated verification code.
-    """
+
+def generate_verification_code(length=6):
+    return ''.join([str(random.randint(0, 9)) for _ in range(length)])
+
+def create_verification_code_for_user(user, code_length=6):  # , expiry_minutes=10
+    # """
+    # Create a new verification code for a user, removing any existing ones.
+    # """
     code = generate_verification_code(code_length)
     
     with transaction.atomic():
@@ -86,15 +46,13 @@ def create_verification_code_for_user(user, code_length=6, expiry_minutes=10):
         OneTimePassword.objects.filter(user=user).delete()
         
         # Create new code
-        # Note: You may need to add an 'expires_at' field to your OneTimePassword model
-        # and set it here using: from django.utils import timezone
+        # If you want to add expiry, uncomment and add expires_at field to model
         # expires_at = timezone.now() + timezone.timedelta(minutes=expiry_minutes)
         OneTimePassword.objects.create(
-            user=user, 
+            user=user,
             code=code,
-            # expires_at=expires_at  # Uncomment if you add this field
+            # expires_at=expires_at
         )
-    
     return code
 
 def format_verification_email(user_name, verification_code, expiry_minutes=10):
@@ -155,3 +113,24 @@ def send_email(to_email, subject, body, from_email=None):
     except Exception as e:
         logger.exception(f"Failed to send email to {to_email}: {str(e)}")
         return False
+    
+
+def send_verification_code_to_user(email):
+    """
+    Send the verification code to the user's email via Celery task.
+    
+    Args:
+        email (str): User's email to send the code.
+    """
+    user, error = get_user_by_email(email)
+    
+    if user is None:
+        return  # Handle case where the user is not found.
+    
+    verification_code = create_verification_code_for_user(user)
+    email_body = format_verification_email(user.name, verification_code)
+
+    subject = "Verify Your Email Address"
+    
+    # Send the email
+    send_email(to_email=email, subject=subject, body=email_body)
