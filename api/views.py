@@ -491,26 +491,39 @@ class IsOwnerOrAdmin(permissions.BasePermission):
 #     permission_classes = [permissions.IsAuthenticated]
 
 
-class FileUploadView(generics.CreateAPIView):
+class FileUploadView(generics.GenericAPIView):
     serializer_class = FileUploadSerializer
     # permission_classes = [permissions.IsAuthenticated]
     permission_classes = [permissions.AllowAny]
 
-    def perform_create(self, serializer):
-        file = serializer.validated_data.get('file')
-        description = serializer.validated_data.get('description', '')
-        tags = serializer.validated_data.get('tags', [])
+    def post(self, request):
+        """
+        Handle file upload. The file is expected in the request's FILES dictionary
+        with the key 'file'. The original filename can be provided in the POST data.
+        """
+        return file_upload(request)
+    
 
-        # Save the file and any additional metadata
-        # Here you can save to your model or perform further actions
-        # Example:
-        file_instance =  EncryptedFile.objects.create(
-            file=file,
-            # description=description,
-            # tags=tags
-        )
+def file_upload(request):
+    file = request.FILES.get('file')
+    original_filename = request.POST.get('original_filename', file.name)
 
-        return file_instance
+    if not file:
+        return Response({"error": "No file provided."}, status=status.HTTP_400_BAD_REQUEST)
+    if not original_filename:
+        return Response({"error": "Original filename is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    file_instance = EncryptedFile.objects.create(
+        file=file,
+        original_filename=original_filename,
+        owner=request.user if request.user.is_authenticated else None
+    )
+    return Response(
+        {"message": "File uploaded successfully.", "file_id": file_instance.id},
+        status=status.HTTP_201_CREATED,
+    )
+
 
 
 class FileListView(generics.ListAPIView):
