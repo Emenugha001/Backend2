@@ -27,6 +27,6 @@ urlpatterns = [
     path('api/files/upload/', FileUploadView.as_view(), name='file-upload'),
     # path("api/files/upload/", file_upload, name='file-upload'),  # For function-based view
     path('api/files/', FileListView.as_view(), name='file-list'),
-    path('api/files/download/<int:pk>/', FileDownloadView.as_view(), name='file-download'),
-    path('api/files/delete/<int:pk>/', FileDeleteView.as_view(), name='file-delete'),
+    path('api/files/download/<uuid:pk>/', FileDownloadView.as_view(), name='file-download'),
+    path('api/files/delete/<uuid:pk>/', FileDeleteView.as_view(), name='file-delete'),
 ]

@@ -1,5 +1,3 @@
-
-
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
@@ -110,7 +108,7 @@ class EncryptedFile(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='files', blank=True, null=True)
     file = models.FileField(upload_to='encrypted_files/')
     original_filename = models.CharField(max_length=255)
-    encrypted_filename = models.CharField(max_length=255, unique=True, blank=True)
+    encrypted_filename = models.CharField(max_length=255, blank=True)
     file_size = models.PositiveIntegerField(default=0)
     content_type = models.CharField(max_length=100, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -148,7 +146,9 @@ class EncryptedFile(models.Model):
         return decrypted_data
     
     def __str__(self):
-        return f"{self.original_filename} (Owner: {self.owner.name})"
+        if self.owner:
+            return f"{self.original_filename} (Owner: {self.owner.name})"
+        return self.original_filename
     
     class Meta:
         ordering = ['-uploaded_at']

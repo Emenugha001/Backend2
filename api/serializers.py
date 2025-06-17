@@ -180,6 +180,13 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             role=role,
             # is_active=False  # Optional: activate after verification
         )
+
+        user.is_active = True
+
+        if user.role == "admin":
+            user.is_staff = True
+        
+        user.save()
         return user
 
 
@@ -210,16 +217,10 @@ class UserLoginSerializer(serializers.Serializer):
     
 
 class FileUploadSerializer(serializers.ModelSerializer):
-    # File field
-    file = serializers.FileField(write_only=True)
-    
-    # New fields for additional metadata
-    description = serializers.CharField(max_length=255, required=False)
-    tags = serializers.ListField(child=serializers.CharField(max_length=50), required=False)
 
     class Meta:
         model = EncryptedFile
-        fields = ['file', 'original_filename', 'description', 'tags']
+        fields = ['file', 'original_filename', 'id']
         read_only_fields = ['owner', 'file_size', 'content_type', 'uploaded_at']
 
     def create(self, validated_data):
